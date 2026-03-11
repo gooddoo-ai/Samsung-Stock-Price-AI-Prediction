@@ -6,7 +6,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>삼성전자 AI 주가 예측 — 정임두</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
@@ -973,8 +974,8 @@ white-space:nowrap;
   </div>
   <div class="hdr-right">
     <div class="hdr-time" id="updateTime">데이터 수신 중...</div>
-    <div class="price-big" id="priceBig"><span class="shim">₩000,000</span></div>
-    <div class="price-chg" id="priceChg"><span class="shim">▲ +0,000 (+0.00%)</span></div>
+    <div class="price-big" id="priceBig">₩187,900</div>
+    <div class="price-chg" id="priceChg"><span class="up">▲ +14,400 (+8.30%) 전일 대비</span></div>
   </div>
 </div>
 
@@ -985,13 +986,13 @@ white-space:nowrap;
   <div class="kpi-row">
     <div class="kpi">
       <div class="kpi-label">삼성전자 현재가 <span class="kpi-src">Yahoo Finance</span></div>
-      <div class="kpi-val" id="kpiPrice"><span class="shim">₩000,000</span></div>
+      <div class="kpi-val" id="kpiPrice">₩187,900</div>
       <div class="kpi-sub" id="kpiChg"></div>
       <div class="kpi-sub" id="kpiRange" style="margin-top:2px;"></div>
     </div>
     <div class="kpi">
       <div class="kpi-label">USD/KRW 환율 <span class="kpi-src">ExchangeRate-API</span></div>
-      <div class="kpi-val" id="kpiFx"><span class="shim">₩0,000</span></div>
+      <div class="kpi-val" id="kpiFx">₩1,471.95</div>
       <div class="kpi-sub" id="kpiFxDate"></div>
       <div class="kpi-sub" style="margin-top:2px;font-size:9px;">52주: ₩1,347 ~ ₩1,507</div>
     </div>
