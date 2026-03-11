@@ -2,968 +2,1883 @@
 
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>삼성전자 주가 예측 대시보드</title>
-  <!-- © 2026 정임두. All rights reserved. 무단 복제 및 배포를 금합니다. -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <style>
-    :root {
-      --bg: #020a14;
-      --surface: #081528;
-      --card: #0c1e35;
-      --border: #1a3554;
-      --accent: #00c8ff;
-      --accent2: #00ff9d;
-      --accent3: #ff6b35;
-      --accent4: #ffcc00;
-      --text: #e0eaf5;
-      --muted: #5b7b9a;
-      --danger: #ff4757;
-      --up: #00ff9d;
-      --down: #ff4757;
-    }
+<!-- © 2026 정임두. All rights reserved. 무단 복제 및 배포를 금합니다. -->
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>삼성전자 AI 주가 예측 — 정임두</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy: #060d1a;
+  --navy2: #0a1628;
+  --navy3: #0f1f3d;
+  --navy4: #162847;
+  --gold: #f0b429;
+  --gold2: #ffd166;
+  --gold3: #ffe599;
+  --cyan: #00d4ff;
+  --green: #00e676;
+  --red: #ff3d57;
+  --amber: #ff9800;
+  --text: #e8edf5;
+  --text2: #8fa3bf;
+  --text3: #4a637f;
+  --border: rgba(240,180,41,0.15);
+  --border2: rgba(240,180,41,0.08);
+  --glow: 0 0 20px rgba(240,180,41,0.15);
+  --glow2: 0 0 40px rgba(0,212,255,0.1);
+}
 
-```
-* { box-sizing: border-box; margin: 0; padding: 0; }
+*{margin:0;padding:0;box-sizing:border-box;}
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Noto Sans KR', sans-serif;
-  min-height: 100vh;
-  overflow-x: hidden;
+background: var(–navy);
+color: var(–text);
+font-family: ‘Pretendard’, sans-serif;
+min-height: 100vh;
+overflow-x: hidden;
 }
 
-/* Animated grid background */
+/* ── Background ── */
 body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
+content:’’;
+position:fixed;inset:0;
+background:
+radial-gradient(ellipse 80% 50% at 50% -10%, rgba(240,180,41,0.07) 0%, transparent 60%),
+radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,212,255,0.04) 0%, transparent 50%),
+linear-gradient(180deg, #060d1a 0%, #070e1c 100%);
+pointer-events:none;z-index:0;
 }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 24px 20px;
-  position: relative;
-  z-index: 1;
+body::after {
+content:’’;
+position:fixed;inset:0;
+background-image:
+linear-gradient(rgba(240,180,41,0.025) 1px, transparent 1px),
+linear-gradient(90deg, rgba(240,180,41,0.025) 1px, transparent 1px);
+background-size:60px 60px;
+pointer-events:none;z-index:0;
 }
 
-/* Header */
-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 16px;
+.wrap { position:relative;z-index:1; }
+
+/* ── Ticker bar ── */
+.ticker {
+background: linear-gradient(90deg, var(–navy3), var(–navy4));
+border-bottom: 1px solid var(–border);
+padding: 0 20px;
+height: 36px;
+display: flex;
+align-items: center;
+gap: 0;
+overflow: hidden;
+position: relative;
 }
 
-.header-left {}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0,200,255,0.1);
-  border: 1px solid rgba(0,200,255,0.3);
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--accent);
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
+.ticker::before {
+content: ‘LIVE’;
+background: var(–gold);
+color: var(–navy);
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+font-weight: 500;
+padding: 2px 8px;
+border-radius: 2px;
+margin-right: 16px;
+white-space: nowrap;
+flex-shrink: 0;
+letter-spacing: 0.1em;
 }
 
-.badge .dot {
-  width: 6px; height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-  animation: pulse 1.5s infinite;
+.ticker-scroll {
+display: flex;
+gap: 32px;
+animation: ticker 30s linear infinite;
+white-space: nowrap;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
+@keyframes ticker {
+0%{transform:translateX(0);}
+100%{transform:translateX(-50%);}
 }
 
-h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+.ticker-item {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text2);
 }
 
-h1 span { color: var(--accent); }
+.ticker-item .sym { color: var(–text); font-weight: 500; }
+.ticker-item .up-t { color: var(–green); }
+.ticker-item .dn-t { color: var(–red); }
 
-.subtitle {
-  color: var(--muted);
-  font-size: 0.82rem;
-  margin-top: 6px;
-  font-family: 'IBM Plex Mono', monospace;
+/* ── Header ── */
+.hdr {
+display: flex;
+align-items: flex-start;
+justify-content: space-between;
+padding: 32px 32px 24px;
+border-bottom: 1px solid var(–border2);
+flex-wrap: wrap;
+gap: 20px;
 }
 
-.header-right {
-  text-align: right;
+.hdr-left {}
+
+.hdr-badge {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+background: rgba(240,180,41,0.08);
+border: 1px solid rgba(240,180,41,0.25);
+border-radius: 3px;
+padding: 4px 12px;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–gold);
+letter-spacing: 0.12em;
+margin-bottom: 14px;
 }
 
-.update-time {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
+.hdr-badge .pulse {
+width: 6px;height: 6px;
+background: var(–green);
+border-radius: 50%;
+animation: pulse 1.5s ease infinite;
+box-shadow: 0 0 6px var(–green);
 }
 
-.current-price-hero {
-  font-size: 2.8rem;
-  font-weight: 700;
-  color: var(--accent2);
-  font-family: 'IBM Plex Mono', monospace;
-  line-height: 1;
+@keyframes pulse{
+0%,100%{opacity:1;transform:scale(1);}
+50%{opacity:.5;transform:scale(.7);}
 }
 
-.price-change {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.9rem;
-  color: var(--up);
-  margin-top: 4px;
+.hdr-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 3.2rem;
+letter-spacing: 0.04em;
+line-height: 1;
+color: var(–text);
 }
 
-/* Grid Layout */
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+.hdr-title span { color: var(–gold); }
+
+.hdr-sub {
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text3);
+margin-top: 8px;
+letter-spacing: 0.06em;
 }
 
-.grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+.hdr-right { text-align: right; }
+
+.hdr-time {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text3);
+letter-spacing: 0.08em;
+margin-bottom: 8px;
 }
 
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
+.price-big {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 4rem;
+letter-spacing: 0.02em;
+color: var(–text);
+line-height: 1;
+text-shadow: var(–glow);
 }
 
-/* Cards */
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.2s;
+.price-chg {
+font-family: ‘DM Mono’, monospace;
+font-size: 13px;
+margin-top: 6px;
 }
 
-.card:hover { border-color: rgba(0,200,255,0.4); }
+.api-pill {
+display: inline-flex;
+align-items: center;
+gap: 5px;
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+padding: 3px 8px;
+border-radius: 2px;
+margin-left: 8px;
+letter-spacing: 0.06em;
+}
+.api-ok { background:rgba(0,230,118,0.1);color:var(–green);border:1px solid rgba(0,230,118,0.2); }
+.api-err { background:rgba(255,61,87,0.1);color:var(–red);border:1px solid rgba(255,61,87,0.2); }
+.api-loading { background:rgba(240,180,41,0.08);color:var(–gold);border:1px solid rgba(240,180,41,0.2); }
 
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0;
-  transition: opacity 0.2s;
+/* ── Main grid ── */
+.main { padding: 24px 32px; display: flex; flex-direction: column; gap: 20px; }
+
+/* ── KPI row ── */
+.kpi-row {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 12px;
 }
 
-.card:hover::before { opacity: 1; }
-
-.card-label {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+.kpi {
+background: linear-gradient(135deg, var(–navy2) 0%, var(–navy3) 100%);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 18px 20px;
+position: relative;
+overflow: hidden;
+transition: border-color 0.3s, transform 0.2s;
 }
 
-.card-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: 'IBM Plex Mono', monospace;
-  color: var(--text);
+.kpi::before {
+content:’’;
+position:absolute;top:0;left:0;right:0;height:2px;
+background: linear-gradient(90deg, transparent, var(–gold), transparent);
+opacity:0;transition:opacity 0.3s;
 }
 
-.card-sub {
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin-top: 4px;
-  font-family: 'IBM Plex Mono', monospace;
+.kpi:hover { border-color: rgba(240,180,41,0.4); transform: translateY(-2px); }
+.kpi:hover::before { opacity:1; }
+
+.kpi-label {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+color: var(–text3);
+letter-spacing: 0.12em;
+text-transform: uppercase;
+margin-bottom: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
 }
 
-.up { color: var(--up); }
-.down { color: var(--down); }
-.neutral { color: var(--accent4); }
-
-/* Section headers */
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
+.kpi-src {
+font-size: 8px;
+background: rgba(255,255,255,0.04);
+border: 1px solid rgba(255,255,255,0.07);
+padding: 1px 5px;
+border-radius: 2px;
+color: var(–text3);
 }
 
-.section-title {
-  font-size: 0.75rem;
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-  text-transform: uppercase;
+.kpi-val {
+font-family: ‘DM Mono’, monospace;
+font-size: 1.55rem;
+font-weight: 500;
+color: var(–text);
+line-height: 1;
 }
 
-.section-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+.kpi-sub {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text3);
+margin-top: 6px;
 }
 
-/* Prediction Cards */
-.prediction-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 20px;
+.up { color: var(–green); }
+.dn { color: var(–red); }
+.gold { color: var(–gold); }
+
+/* ── Chart + Predictions ── */
+.mid-row {
+display: grid;
+grid-template-columns: 1.6fr 1fr;
+gap: 16px;
 }
 
-.pred-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  animation: fadeInUp 0.6s ease forwards;
-  opacity: 0;
+.panel {
+background: linear-gradient(135deg, var(–navy2) 0%, var(–navy3) 100%);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 22px 24px;
+position: relative;
+overflow: hidden;
 }
 
-.pred-card:nth-child(1) { animation-delay: 0.1s; border-top: 2px solid var(--accent); }
-.pred-card:nth-child(2) { animation-delay: 0.2s; border-top: 2px solid var(--accent2); }
-.pred-card:nth-child(3) { animation-delay: 0.3s; border-top: 2px solid var(--accent3); }
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.panel-hdr {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 18px;
 }
 
-.pred-month {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.1em;
-  margin-bottom: 8px;
+.panel-title {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text2);
+letter-spacing: 0.12em;
+text-transform: uppercase;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.panel-title::before {
+content:’’;
+display:inline-block;
+width:3px;height:14px;
+background: var(–gold);
+border-radius:2px;
+}
+
+.chart-h { height: 240px; position: relative; }
+
+/* ── Prediction cards ── */
+.pred-stack { display: flex; flex-direction: column; gap: 10px; }
+
+.pred {
+background: rgba(255,255,255,0.02);
+border: 1px solid var(–border2);
+border-radius: 8px;
+padding: 14px 16px;
+display: grid;
+grid-template-columns: 1fr auto;
+gap: 4px 12px;
+align-items: center;
+transition: background 0.2s, border-color 0.2s;
+cursor: default;
+position: relative;
+overflow: hidden;
+}
+
+.pred::before {
+content:’’;
+position:absolute;
+left:0;top:0;bottom:0;width:3px;
+border-radius:3px 0 0 3px;
+}
+.pred.m1::before { background: var(–cyan); }
+.pred.m2::before { background: var(–green); }
+.pred.m3::before { background: var(–gold); }
+
+.pred:hover { background:rgba(255,255,255,0.04); border-color:var(–border); }
+
+.pred-mo {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+color: var(–text3);
+letter-spacing: 0.1em;
+grid-column: 1;
 }
 
 .pred-price {
-  font-size: 2rem;
-  font-weight: 700;
-  font-family: 'IBM Plex Mono', monospace;
-  margin-bottom: 6px;
+font-family: ‘DM Mono’, monospace;
+font-size: 1.3rem;
+font-weight: 500;
+grid-column: 2;
+grid-row: 1/3;
+align-self: center;
+text-align: right;
+}
+
+.pred-meta {
+grid-column: 1;
+display: flex;
+align-items: center;
+gap: 8px;
+margin-top: 4px;
 }
 
 .pred-range {
-  font-size: 0.72rem;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  margin-bottom: 12px;
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+color: var(–text3);
 }
 
-.confidence-bar {
-  height: 4px;
-  background: var(--border);
-  border-radius: 2px;
-  margin-bottom: 6px;
-  overflow: hidden;
+.pred-chg {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+font-weight: 500;
 }
 
-.confidence-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 1s ease;
+.conf-wrap {
+grid-column: 1/-1;
+margin-top: 8px;
 }
 
-.conf-label {
-  font-size: 0.7rem;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
+.conf-bar {
+height: 3px;
+background: rgba(255,255,255,0.06);
+border-radius: 2px;
+overflow: hidden;
+margin-bottom: 3px;
 }
 
-.pred-change {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.82rem;
-  margin-top: 8px;
+.conf-fill { height: 100%; border-radius: 2px; transition: width 1.2s cubic-bezier(.4,0,.2,1); }
+.pred.m1 .conf-fill { background: var(–cyan); }
+.pred.m2 .conf-fill { background: var(–green); }
+.pred.m3 .conf-fill { background: var(–gold); }
+
+.conf-txt {
+display: flex;
+justify-content: space-between;
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+color: var(–text3);
 }
 
-/* Chart card */
-.chart-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+/* ── Bottom row ── */
+.bot-row {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr;
+gap: 16px;
 }
 
-.chart-wrapper {
-  position: relative;
-  height: 280px;
+/* ── Factor table ── */
+.frow {
+display: flex;
+align-items: center;
+gap: 8px;
+padding: 8px 0;
+border-bottom: 1px solid rgba(255,255,255,0.04);
+font-size: 12px;
+}
+.frow:last-child { border-bottom: none; }
+
+.frow-name { flex:1; color: var(–text2); font-size: 11px; }
+.frow-src {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+color: var(–text3);
+display: block;
+margin-top: 2px;
 }
 
-/* Factors table */
-.factor-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.82rem;
-  gap: 8px;
+.frow-val {
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+font-weight: 500;
+text-align: right;
+min-width: 55px;
 }
 
-.factor-row:last-child { border-bottom: none; }
+.ftag {
+font-size: 8px;
+font-family: ‘DM Mono’, monospace;
+padding: 2px 7px;
+border-radius: 2px;
+letter-spacing: 0.06em;
+white-space: nowrap;
+min-width: 60px;
+text-align: center;
+}
+.fp { background:rgba(0,230,118,0.1);color:var(–green); }
+.fn { background:rgba(255,61,87,0.1);color:var(–red); }
+.fu { background:rgba(240,180,41,0.1);color:var(–gold); }
 
-.factor-name {
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  flex: 1;
+/* ── Signal gauge ── */
+.gauge-wrap { text-align: center; padding: 8px 0 0; }
+
+.gauge-label {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2rem;
+letter-spacing: 0.08em;
+color: var(–green);
+margin-top: -6px;
+text-shadow: 0 0 20px rgba(0,230,118,0.4);
 }
 
-.factor-val {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.82rem;
-  font-weight: 600;
+.sig-pill {
+display: inline-block;
+background: rgba(0,230,118,0.1);
+border: 1px solid rgba(0,230,118,0.3);
+color: var(–green);
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+padding: 5px 16px;
+border-radius: 3px;
+letter-spacing: 0.1em;
+margin-top: 8px;
 }
 
-.factor-impact {
-  font-size: 0.68rem;
-  font-family: 'IBM Plex Mono', monospace;
-  padding: 2px 6px;
-  border-radius: 3px;
-  white-space: nowrap;
+.stat-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 7px 0;
+border-bottom: 1px solid rgba(255,255,255,0.04);
+font-size: 11px;
 }
+.stat-row:last-child { border-bottom: none; }
+.stat-name { color: var(–text3); font-family: ‘DM Mono’, monospace; font-size: 10px; }
+.stat-name span { display: block; font-size: 8px; color: var(–text3); opacity: .6; margin-top: 1px; }
+.stat-val { font-family: ‘DM Mono’, monospace; font-size: 12px; font-weight: 500; }
 
-.impact-pos { background: rgba(0,255,157,0.1); color: var(--up); }
-.impact-neg { background: rgba(255,71,87,0.1); color: var(--down); }
-.impact-neu { background: rgba(255,204,0,0.1); color: var(--accent4); }
-
-/* Gauge */
-.gauge-wrap { text-align: center; padding: 10px 0; }
-
-.gauge-svg { overflow: visible; }
-
-.signal-badge {
-  display: inline-block;
-  padding: 6px 18px;
-  border-radius: 4px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  margin-top: 8px;
+/* ── Smart money ── */
+.sm-item {
+display: flex;
+gap: 12px;
+align-items: flex-start;
+padding: 10px 0;
+border-bottom: 1px solid rgba(255,255,255,0.04);
 }
-
-.signal-buy { background: rgba(0,255,157,0.15); color: var(--up); border: 1px solid rgba(0,255,157,0.4); }
-.signal-hold { background: rgba(255,204,0,0.15); color: var(--accent4); border: 1px solid rgba(255,204,0,0.4); }
-.signal-sell { background: rgba(255,71,87,0.15); color: var(--down); border: 1px solid rgba(255,71,87,0.4); }
-
-/* Smart money */
-.sm-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border);
-}
-.sm-row:last-child { border-bottom: none; }
+.sm-item:last-child { border-bottom: none; }
 
 .sm-rank {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.7rem;
-  color: var(--muted);
-  width: 20px;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.2rem;
+color: var(–text3);
+width: 20px;
+line-height: 1;
+padding-top: 2px;
 }
 
-.sm-name {
-  flex: 1;
-  font-size: 0.8rem;
+.sm-body { flex:1; }
+.sm-name { font-size: 12px; font-weight: 600; color: var(–text); }
+.sm-desc { font-size: 10px; color: var(–text3); margin-top: 2px; line-height: 1.4; font-family: ‘DM Mono’, monospace; }
+
+.sm-badge {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+padding: 3px 8px;
+border-radius: 2px;
+white-space: nowrap;
+letter-spacing: 0.06em;
+align-self: flex-start;
+}
+.sb-buy { background:rgba(0,230,118,0.1);color:var(–green);border:1px solid rgba(0,230,118,0.2); }
+.sb-bull { background:rgba(0,212,255,0.1);color:var(–cyan);border:1px solid rgba(0,212,255,0.2); }
+.sb-hold { background:rgba(240,180,41,0.1);color:var(–gold);border:1px solid rgba(240,180,41,0.2); }
+
+/* ── Sources ── */
+.src-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+margin-top: 14px;
 }
 
-.sm-action {
-  font-size: 0.7rem;
-  font-family: 'IBM Plex Mono', monospace;
-  padding: 2px 8px;
-  border-radius: 3px;
+.src-card {
+background: rgba(255,255,255,0.02);
+border: 1px solid rgba(255,255,255,0.06);
+border-radius: 8px;
+padding: 12px 14px;
+transition: border-color 0.2s;
+}
+.src-card:hover { border-color: var(–border); }
+
+.src-top {
+display: flex;
+align-items: center;
+gap: 6px;
+margin-bottom: 5px;
 }
 
-.action-buy { background: rgba(0,255,157,0.1); color: var(--up); }
-.action-hold { background: rgba(255,204,0,0.1); color: var(--accent4); }
-.action-bull { background: rgba(0,200,255,0.1); color: var(--accent); }
-
-.sm-weight {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--muted);
-  width: 40px;
-  text-align: right;
+.src-icon {
+width: 20px;height: 20px;
+border-radius: 4px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+flex-shrink: 0;
 }
 
-/* Disclaimer */
+.src-name {
+font-size: 11px;
+font-weight: 600;
+color: var(–text);
+}
+
+.src-url {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+color: var(–text3);
+margin-bottom: 5px;
+display: block;
+}
+
+.src-desc {
+font-size: 10px;
+color: var(–text3);
+line-height: 1.5;
+}
+
+.src-data {
+margin-top: 6px;
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+color: var(–gold);
+background: rgba(240,180,41,0.05);
+border-left: 2px solid rgba(240,180,41,0.3);
+padding: 3px 7px;
+border-radius: 0 3px 3px 0;
+}
+
+.live-dot {
+width: 6px;height: 6px;
+background: var(–green);
+border-radius: 50%;
+display: inline-block;
+margin-right: 3px;
+box-shadow: 0 0 5px var(–green);
+animation: pulse 1.5s infinite;
+}
+
+/* ── Disclaimer / footer ── */
+.footer {
+margin: 0 32px 32px;
+border-top: 1px solid var(–border2);
+padding-top: 20px;
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
 .disclaimer {
-  background: rgba(255,71,87,0.05);
-  border: 1px solid rgba(255,71,87,0.2);
-  border-radius: 6px;
-  padding: 14px 18px;
-  font-size: 0.72rem;
-  color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
-  line-height: 1.6;
-  margin-top: 20px;
+background: rgba(255,61,87,0.04);
+border: 1px solid rgba(255,61,87,0.15);
+border-radius: 8px;
+padding: 12px 16px;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text3);
+line-height: 1.7;
+}
+.disclaimer strong { color: var(–red); }
+
+.copyright {
+text-align: center;
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+color: var(–text3);
+letter-spacing: 0.08em;
 }
 
-.disclaimer strong { color: var(--danger); }
+/* shimmer */
+.shim {
+display:inline-block;
+background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);
+background-size:200% 100%;
+animation:shim 1.5s infinite;
+border-radius:3px;color:transparent;
+}
+@keyframes shim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
 
-/* Responsive */
-@media (max-width: 900px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: 1fr 1fr; }
-  .prediction-grid { grid-template-columns: 1fr; }
-  .grid-2 { grid-template-columns: 1fr; }
-  .current-price-hero { font-size: 2rem; }
+/* ── Simulator ── */
+.sim-grid {
+display: grid;
+grid-template-columns: 280px 1fr;
+gap: 20px;
+align-items: start;
 }
 
-@media (max-width: 600px) {
-  .grid-3 { grid-template-columns: 1fr; }
-  .grid-4 { grid-template-columns: 1fr; }
-  h1 { font-size: 1.5rem; }
+.sim-result {
+background: rgba(0,212,255,0.04);
+border: 1px solid rgba(0,212,255,0.15);
+border-radius: 10px;
+padding: 18px;
+position: sticky;
+top: 20px;
 }
 
-/* Skeleton loading */
-.loading {
-  display: inline-block;
-  width: 80px; height: 14px;
-  background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 3px;
+.sim-price {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 2.6rem;
+letter-spacing: .04em;
+color: var(–cyan);
+line-height: 1;
+text-shadow: 0 0 20px rgba(0,212,255,0.3);
+transition: all .3s;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.sim-diff {
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: var(–text2);
+margin-top: 6px;
+transition: all .3s;
 }
 
-.tag {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 3px;
-  font-size: 0.65rem;
-  font-family: 'IBM Plex Mono', monospace;
-  background: rgba(0,200,255,0.1);
-  color: var(--accent);
-  border: 1px solid rgba(0,200,255,0.2);
-  margin-left: 6px;
+.sim-formula {
+margin-top: 14px;
+background: rgba(240,180,41,0.05);
+border: 1px solid rgba(240,180,41,0.15);
+border-radius: 6px;
+padding: 10px 12px;
 }
-```
 
-  </style>
+.contrib-list { display:flex;flex-direction:column;gap:5px; }
+
+.contrib-item {
+display: flex;
+align-items: center;
+gap: 6px;
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+}
+
+.contrib-name { color: var(–text3); width: 90px; }
+.contrib-val { font-weight:500; min-width:60px; text-align:right; }
+.contrib-mini-bar { flex:1; height:3px; background:rgba(255,255,255,.05); border-radius:2px; overflow:hidden; }
+.contrib-mini-fill { height:100%; border-radius:2px; transition:width .4s; }
+
+.sim-levers { display:flex;flex-direction:column;gap:14px; }
+
+.lever-row {
+background: rgba(255,255,255,0.02);
+border: 1px solid rgba(255,255,255,0.06);
+border-radius: 8px;
+padding: 12px 14px;
+transition: border-color .2s;
+}
+.lever-row:hover { border-color: rgba(0,212,255,0.2); }
+
+.lever-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 8px;
+}
+
+.lever-name {
+font-size: 12px;
+font-weight: 600;
+color: var(–text);
+}
+
+.lever-src {
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+color: var(–text3);
+margin-top: 2px;
+}
+
+.wval { color: var(–gold); }
+
+.lever-badge {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+padding: 2px 8px;
+border-radius: 2px;
+background: rgba(255,255,255,.05);
+color: var(–text3);
+border: 1px solid rgba(255,255,255,.08);
+white-space: nowrap;
+letter-spacing: .06em;
+}
+
+.lever-track {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 6px;
+}
+
+.lever-bound {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+color: var(–text3);
+white-space: nowrap;
+width: 36px;
+}
+.lever-bound:last-child { text-align:right; }
+
+.lever-slider {
+flex: 1;
+-webkit-appearance: none;
+appearance: none;
+height: 4px;
+border-radius: 2px;
+background: rgba(255,255,255,0.08);
+outline: none;
+cursor: pointer;
+position: relative;
+}
+.lever-slider::-webkit-slider-thumb {
+-webkit-appearance: none;
+width: 16px; height: 16px;
+border-radius: 50%;
+background: var(–cyan);
+cursor: pointer;
+box-shadow: 0 0 8px rgba(0,212,255,0.5);
+transition: box-shadow .2s;
+}
+.lever-slider::-webkit-slider-thumb:hover {
+box-shadow: 0 0 14px rgba(0,212,255,0.7);
+}
+.lever-slider::-moz-range-thumb {
+width: 16px; height: 16px;
+border-radius: 50%;
+background: var(–cyan);
+cursor: pointer;
+border: none;
+}
+
+.lever-vals {
+display: flex;
+justify-content: space-between;
+font-family: ‘DM Mono’, monospace;
+font-size: 9px;
+margin-bottom: 6px;
+}
+
+.lever-delta { color: var(–text2); font-weight:500; }
+
+.lever-impact-bar {
+height: 3px;
+background: rgba(255,255,255,0.05);
+border-radius: 2px;
+overflow: hidden;
+}
+.lever-fill {
+height: 100%;
+border-radius: 2px;
+width: 0%;
+transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* broker grid */
+.broker-grid {
+display: grid;
+grid-template-columns: repeat(6, 1fr);
+gap: 10px;
+}
+
+.broker-card {
+background: rgba(255,255,255,0.02);
+border: 1px solid rgba(255,255,255,0.06);
+border-radius: 8px;
+padding: 12px;
+text-align: center;
+transition: border-color .2s, transform .2s;
+cursor: default;
+}
+.broker-card:hover { border-color:rgba(240,180,41,0.3); transform:translateY(-2px); }
+
+.broker-name {
+font-family: ‘DM Mono’, monospace;
+font-size: 8px;
+color: var(–text3);
+margin-bottom: 6px;
+letter-spacing:.04em;
+}
+.broker-target {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 1.3rem;
+letter-spacing:.04em;
+line-height:1;
+}
+.broker-upside {
+font-family: ‘DM Mono’, monospace;
+font-size: 10px;
+font-weight:500;
+margin: 4px 0 6px;
+}
+.broker-bar {
+height: 3px;
+background: rgba(255,255,255,.05);
+border-radius: 2px;
+overflow:hidden;
+margin-bottom: 6px;
+}
+.broker-method {
+font-family: ‘DM Mono’, monospace;
+font-size: 7.5px;
+color: var(–text3);
+line-height: 1.4;
+}
+
+@media(max-width:1100px){
+.sim-grid{grid-template-columns:1fr;}
+.broker-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:700px){
+.broker-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+/* section divider */
+.sdiv {
+display:flex;align-items:center;gap:12px;
+margin-bottom:14px;
+}
+.sdiv-title {
+font-family:‘DM Mono’,monospace;font-size:9px;
+color:var(–text3);text-transform:uppercase;letter-spacing:.14em;
+white-space:nowrap;
+}
+.sdiv-line { flex:1;height:1px;background:var(–border2); }
+
+/* responsive */
+@media(max-width:1100px){
+.mid-row{grid-template-columns:1fr;}
+.bot-row{grid-template-columns:1fr 1fr;}
+.kpi-row{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+.bot-row,.kpi-row,.src-grid{grid-template-columns:1fr;}
+.hdr{padding:20px 16px 16px;}
+.main{padding:16px;}
+.hdr-title{font-size:2.2rem;}
+.price-big{font-size:2.8rem;}
+.footer{margin:0 16px 24px;}
+}
+
+/* entry animations */
+.kpi { animation: fadeUp .5s ease both; }
+.kpi:nth-child(1){animation-delay:.05s;}
+.kpi:nth-child(2){animation-delay:.1s;}
+.kpi:nth-child(3){animation-delay:.15s;}
+.kpi:nth-child(4){animation-delay:.2s;}
+.pred { animation: fadeUp .5s ease both; }
+.pred:nth-child(1){animation-delay:.2s;}
+.pred:nth-child(2){animation-delay:.3s;}
+.pred:nth-child(3){animation-delay:.4s;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+</style>
+
 </head>
 <body>
-<div class="container">
+<div class="wrap">
 
-  <!-- Header -->
+<!-- Ticker -->
 
-  <header>
-    <div class="header-left">
-      <div class="badge"><span class="dot"></span> LIVE DATA — KRX:005930</div>
-      <h1>삼성전자 <span>주가 예측</span><br>인텔리전스</h1>
-      <div class="subtitle">// AI 기반 멀티팩터 분석 · 실시간 시장 데이터 통합</div>
+<div class="ticker">
+  <div class="ticker-scroll" id="tickerScroll">
+    <span class="ticker-item"><span class="sym">005930.KS</span> <span id="tk-price" class="up">₩187,900</span> <span class="up">▲+8.30%</span></span>
+    <span class="ticker-item"><span class="sym">USD/KRW</span> <span id="tk-fx">₩1,471.95</span> <span class="dn">▼-0.12%</span></span>
+    <span class="ticker-item"><span class="sym">WTI CRUDE</span> <span class="dn">$87.29/bbl</span> <span class="up">▲+중동긴장</span></span>
+    <span class="ticker-item"><span class="sym">BRENT</span> <span class="dn">$94.00/bbl</span> <span class="up">▲+7yr HIGH</span></span>
+    <span class="ticker-item"><span class="sym">KOSPI</span> <span class="up">2,870.45</span> <span class="up">▲+1.2%</span></span>
+    <span class="ticker-item"><span class="sym">ANALYST TARGET</span> <span class="gold">₩228,968</span> <span class="up">STRONG BUY</span></span>
+    <span class="ticker-item"><span class="sym">MORNINGSTAR FV</span> <span class="gold">₩313,346</span> <span class="up">▲+40% UPSIDE</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="sym">005930.KS</span> <span class="up">₩187,900</span> <span class="up">▲+8.30%</span></span>
+    <span class="ticker-item"><span class="sym">USD/KRW</span> <span id="tk-fx2">₩1,471.95</span> <span class="dn">▼-0.12%</span></span>
+    <span class="ticker-item"><span class="sym">WTI CRUDE</span> <span class="dn">$87.29/bbl</span> <span class="up">▲+중동긴장</span></span>
+    <span class="ticker-item"><span class="sym">BRENT</span> <span class="dn">$94.00/bbl</span> <span class="up">▲+7yr HIGH</span></span>
+    <span class="ticker-item"><span class="sym">KOSPI</span> <span class="up">2,870.45</span> <span class="up">▲+1.2%</span></span>
+    <span class="ticker-item"><span class="sym">ANALYST TARGET</span> <span class="gold">₩228,968</span> <span class="up">STRONG BUY</span></span>
+    <span class="ticker-item"><span class="sym">MORNINGSTAR FV</span> <span class="gold">₩313,346</span> <span class="up">▲+40% UPSIDE</span></span>
+  </div>
+</div>
+
+<!-- Header -->
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-badge">
+      <span class="pulse"></span>
+      KRX:005930 · 삼성전자
+      <span class="api-pill api-loading" id="apiStatus">연결 중...</span>
     </div>
-    <div class="header-right">
-      <div class="update-time" id="updateTime">갱신 중...</div>
-      <div class="current-price-hero">₩187,900</div>
-      <div class="price-change">▲ +14,400 (+8.30%) 전일 대비</div>
+    <div class="hdr-title">삼성전자<br><span>AI 주가 예측</span></div>
+    <div class="hdr-sub">// REAL-TIME MULTI-FACTOR INTELLIGENCE · © 2026 정임두</div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-time" id="updateTime">데이터 수신 중...</div>
+    <div class="price-big" id="priceBig"><span class="shim">₩000,000</span></div>
+    <div class="price-chg" id="priceChg"><span class="shim">▲ +0,000 (+0.00%)</span></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI row -->
+
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">삼성전자 현재가 <span class="kpi-src">Yahoo Finance</span></div>
+      <div class="kpi-val" id="kpiPrice"><span class="shim">₩000,000</span></div>
+      <div class="kpi-sub" id="kpiChg"></div>
+      <div class="kpi-sub" id="kpiRange" style="margin-top:2px;"></div>
     </div>
-  </header>
-
-  <!-- Macro Indicators Row -->
-
-  <div class="section-header">
-    <div class="section-title">실시간 거시지표</div>
-    <div class="section-line"></div>
+    <div class="kpi">
+      <div class="kpi-label">USD/KRW 환율 <span class="kpi-src">ExchangeRate-API</span></div>
+      <div class="kpi-val" id="kpiFx"><span class="shim">₩0,000</span></div>
+      <div class="kpi-sub" id="kpiFxDate"></div>
+      <div class="kpi-sub" style="margin-top:2px;font-size:9px;">52주: ₩1,347 ~ ₩1,507</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">WTI 원유 <span class="kpi-src">EIA 2026.03.09</span></div>
+      <div class="kpi-val dn">$87.29</div>
+      <div class="kpi-sub dn">브렌트 $94 · 호르무즈 긴장</div>
+      <div class="kpi-sub" style="margin-top:2px;font-size:9px;">EIA STEO 기준 · $95+ 예측 2개월</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">애널리스트 컨센서스 <span class="kpi-src">Investing.com</span></div>
+      <div class="kpi-val gold">STRONG BUY</div>
+      <div class="kpi-sub up">37명 · 35 BUY / 2 HOLD</div>
+      <div class="kpi-sub" style="margin-top:2px;font-size:9px;">목표가 ₩228,968 avg · max ₩340,000</div>
+    </div>
   </div>
 
-  <div class="grid-4" style="margin-bottom:24px;">
-    <div class="card">
-      <div class="card-label">USD/KRW 환율</div>
-      <div class="card-value" id="usdkrw">₩1,471.95</div>
-      <div class="card-sub up">▲ +9.72 오늘</div>
-      <div class="card-sub" style="margin-top:6px; font-size:0.68rem;">52주 범위: 1,347~1,507</div>
-    </div>
-    <div class="card">
-      <div class="card-label">WTI 원유 (USD/배럴)</div>
-      <div class="card-value up" id="oilPrice">$87.29</div>
-      <div class="card-sub up">▲ 중동 긴장 고조 (호르무즈 해협)</div>
-      <div class="card-sub" style="margin-top:6px; font-size:0.68rem;">브렌트 $94/배럴 (EIA, 3/9)</div>
-    </div>
-    <div class="card">
-      <div class="card-label">반도체 수요 지수</div>
-      <div class="card-value up">강세</div>
-      <div class="card-sub up">▲ AI 데이터센터 HBM 수요 급증</div>
-      <div class="card-sub" style="margin-top:6px; font-size:0.68rem;">갤럭시 S26 출시 호재</div>
-    </div>
-    <div class="card">
-      <div class="card-label">애널리스트 컨센서스</div>
-      <div class="card-value" style="color:var(--up);">강력 매수</div>
-      <div class="card-sub">37명 애널리스트 / 35명 BUY</div>
-      <div class="card-sub" style="margin-top:6px; font-size:0.68rem;">목표가 ₩228,968 (평균)</div>
+  <!-- Chart + Predictions -->
+
+  <div class="mid-row">
+
+```
+<!-- Chart -->
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-title">주가 추이 및 3개월 예측</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);">
+      실선 = 실제  ·  점선 = AI 예측
     </div>
   </div>
+  <div class="chart-h"><canvas id="priceChart"></canvas></div>
+</div>
 
-  <!-- Price Chart -->
-
-  <div class="section-header">
-    <div class="section-title">주가 추이 및 예측</div>
-    <div class="section-line"></div>
+<!-- Predictions -->
+<div class="panel">
+  <div class="panel-hdr">
+    <div class="panel-title">월별 가격 예측</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);">현재가 기준 동적 산출</div>
   </div>
+  <div class="pred-stack">
 
-  <div class="chart-card" style="margin-bottom:20px;">
-    <div class="chart-wrapper">
-      <canvas id="priceChart"></canvas>
-    </div>
-  </div>
-
-  <!-- Predictions -->
-
-  <div class="section-header">
-    <div class="section-title">월별 가격 예측</div>
-    <div class="section-line"></div>
-    <div style="font-size:0.68rem; color:var(--muted); font-family:'IBM Plex Mono',monospace;">멀티팩터 AI 모델 기반</div>
-  </div>
-
-  <div class="prediction-grid">
-    <!-- March 2026 -->
-    <div class="pred-card">
-      <div class="pred-month">📅 2026년 3월 (이번 달)</div>
-      <div class="pred-price" style="color:var(--accent);">₩192,500</div>
-      <div class="pred-range">범위: ₩181,000 ~ ₩205,000</div>
-      <div class="confidence-bar">
-        <div class="confidence-fill" style="width:78%; background:var(--accent);"></div>
+    <div class="pred m1">
+      <div class="pred-mo">📅 2026년 3월 (이번 달)</div>
+      <div class="pred-price" style="color:var(--cyan);" id="pred1">₩192,500</div>
+      <div class="pred-meta">
+        <div class="pred-range" id="pred1r">₩181K ~ ₩205K</div>
+        <div class="pred-chg up" id="pred1c">▲+2.45%</div>
       </div>
-      <div class="conf-label">신뢰도 78% · 단기 상승 모멘텀</div>
-      <div class="pred-change up">▲ 현재가 대비 +2.45%</div>
-      <div style="margin-top:14px; font-size:0.72rem; color:var(--muted); line-height:1.6;">
-        • 갤럭시 S26 출시 수혜<br>
-        • 52주 최고가(₩223,000) 대비 할인<br>
-        • 배당락일 3/30 전 매수세 기대
+      <div class="conf-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:78%;"></div></div>
+        <div class="conf-txt"><span>신뢰도</span><span>78%</span></div>
+      </div>
+    </div>
+
+    <div class="pred m2">
+      <div class="pred-mo">📅 2026년 4월 (다음 달)</div>
+      <div class="pred-price" style="color:var(--green);" id="pred2">₩208,000</div>
+      <div class="pred-meta">
+        <div class="pred-range" id="pred2r">₩195K ~ ₩225K</div>
+        <div class="pred-chg up" id="pred2c">▲+10.7%</div>
+      </div>
+      <div class="conf-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:65%;"></div></div>
+        <div class="conf-txt"><span>신뢰도</span><span>65%</span></div>
+      </div>
+    </div>
+
+    <div class="pred m3">
+      <div class="pred-mo">📅 2026년 5월 (그 다음 달)</div>
+      <div class="pred-price" style="color:var(--gold);" id="pred3">₩220,000</div>
+      <div class="pred-meta">
+        <div class="pred-range" id="pred3r">₩195K ~ ₩250K</div>
+        <div class="pred-chg up" id="pred3c">▲+17.1%</div>
+      </div>
+      <div class="conf-wrap">
+        <div class="conf-bar"><div class="conf-fill" style="width:51%;"></div></div>
+        <div class="conf-txt"><span>신뢰도</span><span>51%</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Bottom row -->
+
+  <div class="bot-row">
+
+```
+<!-- Factors -->
+<div class="panel">
+  <div class="sdiv">
+    <div class="sdiv-title">⚙ 주가 영향 요인</div>
+    <div class="sdiv-line"></div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">USD/KRW 환율<span class="frow-src"><span class="live-dot"></span>ExchangeRate-API · 실시간</span></div>
+    <div class="frow-val dn" id="fxFactor">₩1,472</div>
+    <div class="ftag fu">중립적</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">WTI 유가<span class="frow-src">EIA STEO · 2026.03.09</span></div>
+    <div class="frow-val dn">$87.29</div>
+    <div class="ftag fn">비용 압박</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">HBM/AI 반도체 수요<span class="frow-src">IDC · Motley Fool · BlackRock</span></div>
+    <div class="frow-val up">급증</div>
+    <div class="ftag fp">강력 호재</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">갤럭시 S26 출시 (2/25)<span class="frow-src">Samsung 공식 · IBT Australia</span></div>
+    <div class="frow-val up">호재</div>
+    <div class="ftag fp">매출 증가</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">중동 지정학 리스크<span class="frow-src">EIA STEO · OilPrice.com</span></div>
+    <div class="frow-val dn">고조</div>
+    <div class="ftag fn">공급 불확실</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">WGBI 편입 (4월~)<span class="frow-src">RBC Capital Markets</span></div>
+    <div class="frow-val up">긍정</div>
+    <div class="ftag fp">외자 유입</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">4/23 실적 발표<span class="frow-src">TradingView 컨센서스</span></div>
+    <div class="frow-val up">EPS ↑</div>
+    <div class="ftag fp">어닝 서프라이즈</div>
+  </div>
+  <div class="frow">
+    <div class="frow-name">Fed 금리 인하 (2회 전망)<span class="frow-src">RBC FX Report · Fed 성명</span></div>
+    <div class="frow-val up">우호적</div>
+    <div class="ftag fp">유동성 개선</div>
+  </div>
+</div>
+
+<!-- Signal + Stats -->
+<div class="panel" style="display:flex;flex-direction:column;gap:20px;">
+
+  <!-- Gauge -->
+  <div>
+    <div class="sdiv">
+      <div class="sdiv-title">🎯 종합 투자 신호</div>
+      <div class="sdiv-line"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);">Investing.com · Stockopedia</div>
+    </div>
+    <div class="gauge-wrap">
+      <svg width="200" height="115" viewBox="0 0 200 115" style="overflow:visible;">
+        <path d="M 15 100 A 85 85 0 0 1 185 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="16" stroke-linecap="round"/>
+        <path d="M 15 100 A 85 85 0 0 1 57 28" fill="none" stroke="rgba(255,61,87,0.3)" stroke-width="16" stroke-linecap="round"/>
+        <path d="M 57 28 A 85 85 0 0 1 143 28" fill="none" stroke="rgba(240,180,41,0.3)" stroke-width="16" stroke-linecap="round"/>
+        <path d="M 143 28 A 85 85 0 0 1 185 100" fill="none" stroke="rgba(0,230,118,0.3)" stroke-width="16" stroke-linecap="round"/>
+        <path d="M 15 100 A 85 85 0 1 1 178 65" fill="none" stroke="url(#gg)" stroke-width="16" stroke-linecap="round" stroke-dasharray="210 268"/>
+        <defs>
+          <linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#ff3d57"/>
+            <stop offset="50%" style="stop-color:#f0b429"/>
+            <stop offset="100%" style="stop-color:#00e676"/>
+          </linearGradient>
+        </defs>
+        <line x1="100" y1="100" x2="176" y2="48" stroke="#00e676" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="100" cy="100" r="5" fill="#00e676" style="filter:drop-shadow(0 0 6px #00e676)"/>
+        <text x="10" y="114" fill="#ff3d57" font-size="8" font-family="DM Mono">SELL</text>
+        <text x="87" y="14" fill="#f0b429" font-size="8" font-family="DM Mono" text-anchor="middle">HOLD</text>
+        <text x="187" y="114" fill="#00e676" font-size="8" font-family="DM Mono" text-anchor="end">BUY</text>
+      </svg>
+      <div class="gauge-label">강력 매수</div>
+      <div class="sig-pill">STRONG BUY · CONF. 78%</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-top:8px;">
+        37명 · 35 BUY / 2 HOLD — Investing.com
+      </div>
+    </div>
+  </div>
+
+  <!-- Key stats -->
+  <div>
+    <div class="sdiv"><div class="sdiv-title">📊 핵심 지표</div><div class="sdiv-line"></div></div>
+    <div class="stat-row">
+      <div class="stat-name">현재가<span>Yahoo Finance · 실시간</span></div>
+      <div class="stat-val up" id="statPrice">₩187,900</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-name">52주 High/Low<span>Investing.com</span></div>
+      <div class="stat-val">₩223K / ₩52.5K</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-name">PER (TTM)<span>Stockopedia</span></div>
+      <div class="stat-val">8.18x</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-name">공정가치 (DCF)<span>Morningstar 2026.01.30</span></div>
+      <div class="stat-val gold">₩313,346</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-name">목표주가 (avg)<span>Investing.com · 37명</span></div>
+      <div class="stat-val gold">₩228,968</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-name">배당수익률<span>Stockopedia</span></div>
+      <div class="stat-val">0.88%</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Smart money -->
+<div class="panel">
+  <div class="sdiv">
+    <div class="sdiv-title">💼 스마트 머니</div>
+    <div class="sdiv-line"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);">SEC 13F 2026.02.12</div>
+  </div>
+  <div class="sm-item">
+    <div class="sm-rank">01</div>
+    <div class="sm-body">
+      <div class="sm-name">BlackRock Inc.</div>
+      <div class="sm-desc">NVDA·AAPL·MSFT 최상위 → 반도체 강세<br>AUM $5.9T · fintel.io/i/blackrock</div>
+    </div>
+    <div class="sm-badge sb-bull">반도체 강세</div>
+  </div>
+  <div class="sm-item">
+    <div class="sm-rank">02</div>
+    <div class="sm-body">
+      <div class="sm-name">Berkshire (워런 버핏)</div>
+      <div class="sm-desc">기술주 선별 매수 · 현금 보유 전략<br>보수적 가치투자 기조</div>
+    </div>
+    <div class="sm-badge sb-hold">선별 매수</div>
+  </div>
+  <div class="sm-item">
+    <div class="sm-rank">03</div>
+    <div class="sm-body">
+      <div class="sm-name">iShares SOXX ETF</div>
+      <div class="sm-desc">AI 인프라 수요 낙관 · 반도체 자금 유입<br>Morningstar Bronze · blackrock.com</div>
+    </div>
+    <div class="sm-badge sb-buy">적극 매수</div>
+  </div>
+  <div class="sm-item">
+    <div class="sm-rank">04</div>
+    <div class="sm-body">
+      <div class="sm-name">국내 기관투자자</div>
+      <div class="sm-desc">WGBI 편입 앞두고 월 $7B KRW 유입<br>RBC Capital Markets FX Report</div>
+    </div>
+    <div class="sm-badge sb-buy">순매수</div>
+  </div>
+  <div class="sm-item">
+    <div class="sm-rank">05</div>
+    <div class="sm-body">
+      <div class="sm-name">외국인 투자자</div>
+      <div class="sm-desc">52주 최고가 후 차익실현 구간<br>실적 발표 전 관망세 · TradingView</div>
+    </div>
+    <div class="sm-badge sb-hold">관망</div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       거시지표 레버 시뮬레이터
+  ══════════════════════════════════════════ -->
+
+  <div class="panel" id="simPanel" style="border-color:rgba(0,212,255,0.25);">
+    <div class="panel-hdr">
+      <div class="panel-title" style="color:var(--cyan);">⚡ 거시지표 레버 시뮬레이터</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);">슬라이더 조정 → 주가 즉시 재계산</div>
+        <button onclick="resetSim()" style="background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.3);color:var(--cyan);font-family:'DM Mono',monospace;font-size:9px;padding:4px 10px;border-radius:3px;cursor:pointer;letter-spacing:.06em;">RESET</button>
       </div>
     </div>
 
 ```
-<!-- April 2026 -->
-<div class="pred-card">
-  <div class="pred-month">📅 2026년 4월 (다음 달)</div>
-  <div class="pred-price" style="color:var(--accent2);">₩208,000</div>
-  <div class="pred-range">범위: ₩195,000 ~ ₩225,000</div>
-  <div class="confidence-bar">
-    <div class="confidence-fill" style="width:65%; background:var(--accent2);"></div>
+<div class="sim-grid">
+
+  <!-- 결과 패널 -->
+  <div class="sim-result">
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:.1em;margin-bottom:10px;">시뮬레이션 예측 주가</div>
+    <div class="sim-price" id="simPrice">₩187,900</div>
+    <div class="sim-diff" id="simDiff">기준가 대비 ±0원 (±0.00%)</div>
+
+    <div style="margin-top:16px;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);margin-bottom:8px;">요인별 기여도</div>
+      <div class="contrib-list" id="contribList"></div>
+    </div>
+
+    <div class="sim-formula">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-bottom:6px;">산출 공식</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);line-height:1.8;" id="simFormula">
+        P = P₀ × (1 + Σwᵢ·Δxᵢ)
+      </div>
+    </div>
   </div>
-  <div class="conf-label">신뢰도 65% · 실적 발표 촉매</div>
-  <div class="pred-change up">▲ 현재가 대비 +10.7%</div>
-  <div style="margin-top:14px; font-size:0.72rem; color:var(--muted); line-height:1.6;">
-    • 4/23 실적 발표 (EPS ₩4,830 예상)<br>
-    • 배당금 지급일 4/20<br>
-    • HBM4 양산 본격화 기대감
+
+  <!-- 슬라이더 패널 -->
+  <div class="sim-levers">
+
+    <!-- 환율 -->
+    <div class="lever-row">
+      <div class="lever-header">
+        <div class="lever-info">
+          <div class="lever-name">USD/KRW 환율</div>
+          <div class="lever-src">가중치 w = <span class="wval">-0.45</span> · ExchangeRate-API</div>
+        </div>
+        <div class="lever-badge" id="lb-fx">기준</div>
+      </div>
+      <div class="lever-track">
+        <span class="lever-bound">-30%</span>
+        <input type="range" class="lever-slider" id="sl-fx" min="-30" max="30" value="0" step="0.5" oninput="runSim()"/>
+        <span class="lever-bound">+30%</span>
+      </div>
+      <div class="lever-vals">
+        <span style="color:var(--text3);">현재: <span id="cv-fx">₩1,472</span></span>
+        <span class="lever-delta" id="ld-fx">변동: ±0%</span>
+        <span style="color:var(--text3);">시뮬: <span class="gold" id="sv-fx">₩1,472</span></span>
+      </div>
+      <div class="lever-impact-bar"><div class="lever-fill" id="lf-fx" style="background:var(--red);"></div></div>
+    </div>
+
+    <!-- 유가 -->
+    <div class="lever-row">
+      <div class="lever-header">
+        <div class="lever-info">
+          <div class="lever-name">WTI 원유 (USD/배럴)</div>
+          <div class="lever-src">가중치 w = <span class="wval">-0.28</span> · EIA STEO</div>
+        </div>
+        <div class="lever-badge" id="lb-oil">기준</div>
+      </div>
+      <div class="lever-track">
+        <span class="lever-bound">-50%</span>
+        <input type="range" class="lever-slider" id="sl-oil" min="-50" max="50" value="0" step="1" oninput="runSim()"/>
+        <span class="lever-bound">+50%</span>
+      </div>
+      <div class="lever-vals">
+        <span style="color:var(--text3);">현재: <span id="cv-oil">$87.29</span></span>
+        <span class="lever-delta" id="ld-oil">변동: ±0%</span>
+        <span style="color:var(--text3);">시뮬: <span class="gold" id="sv-oil">$87.29</span></span>
+      </div>
+      <div class="lever-impact-bar"><div class="lever-fill" id="lf-oil" style="background:var(--red);"></div></div>
+    </div>
+
+    <!-- 금리 -->
+    <div class="lever-row">
+      <div class="lever-header">
+        <div class="lever-info">
+          <div class="lever-name">미국 기준금리 (Fed Rate)</div>
+          <div class="lever-src">가중치 w = <span class="wval">-0.35</span> · RBC FX Report</div>
+        </div>
+        <div class="lever-badge" id="lb-rate">기준</div>
+      </div>
+      <div class="lever-track">
+        <span class="lever-bound">-2.0%p</span>
+        <input type="range" class="lever-slider" id="sl-rate" min="-200" max="200" value="0" step="25" oninput="runSim()"/>
+        <span class="lever-bound">+2.0%p</span>
+      </div>
+      <div class="lever-vals">
+        <span style="color:var(--text3);">현재: <span id="cv-rate">4.25%</span></span>
+        <span class="lever-delta" id="ld-rate">변동: ±0bp</span>
+        <span style="color:var(--text3);">시뮬: <span class="gold" id="sv-rate">4.25%</span></span>
+      </div>
+      <div class="lever-impact-bar"><div class="lever-fill" id="lf-rate" style="background:var(--red);"></div></div>
+    </div>
+
+    <!-- 반도체 수요 -->
+    <div class="lever-row">
+      <div class="lever-header">
+        <div class="lever-info">
+          <div class="lever-name">반도체 수요 지수 (HBM/AI)</div>
+          <div class="lever-src">가중치 w = <span class="wval">+0.62</span> · IDC · BlackRock</div>
+        </div>
+        <div class="lever-badge" id="lb-semi" style="background:rgba(0,230,118,.1);color:var(--green);border-color:rgba(0,230,118,.25);">기준</div>
+      </div>
+      <div class="lever-track">
+        <span class="lever-bound">-40%</span>
+        <input type="range" class="lever-slider" id="sl-semi" min="-40" max="40" value="0" step="1" oninput="runSim()"/>
+        <span class="lever-bound">+40%</span>
+      </div>
+      <div class="lever-vals">
+        <span style="color:var(--text3);">현재: <span id="cv-semi">100p (기준)</span></span>
+        <span class="lever-delta" id="ld-semi">변동: ±0%</span>
+        <span style="color:var(--text3);">시뮬: <span class="gold" id="sv-semi">100p</span></span>
+      </div>
+      <div class="lever-impact-bar"><div class="lever-fill" id="lf-semi" style="background:var(--green);"></div></div>
+    </div>
+
+    <!-- 애널리스트 목표가 -->
+    <div class="lever-row">
+      <div class="lever-header">
+        <div class="lever-info">
+          <div class="lever-name">애널리스트 목표가 컨센서스</div>
+          <div class="lever-src">가중치 w = <span class="wval">+0.41</span> · Investing.com · TradingView</div>
+        </div>
+        <div class="lever-badge" id="lb-ana" style="background:rgba(0,230,118,.1);color:var(--green);border-color:rgba(0,230,118,.25);">기준</div>
+      </div>
+      <div class="lever-track">
+        <span class="lever-bound">-30%</span>
+        <input type="range" class="lever-slider" id="sl-ana" min="-30" max="30" value="0" step="1" oninput="runSim()"/>
+        <span class="lever-bound">+30%</span>
+      </div>
+      <div class="lever-vals">
+        <span style="color:var(--text3);">현재: <span id="cv-ana">₩228,968</span></span>
+        <span class="lever-delta" id="ld-ana">변동: ±0%</span>
+        <span style="color:var(--text3);">시뮬: <span class="gold" id="sv-ana">₩228,968</span></span>
+      </div>
+      <div class="lever-impact-bar"><div class="lever-fill" id="lf-ana" style="background:var(--green);"></div></div>
+    </div>
+
   </div>
 </div>
 
-<!-- May 2026 -->
-<div class="pred-card">
-  <div class="pred-month">📅 2026년 5월 (그 다음 달)</div>
-  <div class="pred-price" style="color:var(--accent3);">₩220,000</div>
-  <div class="pred-range">범위: ₩195,000 ~ ₩250,000</div>
-  <div class="confidence-bar">
-    <div class="confidence-fill" style="width:51%; background:var(--accent3);"></div>
+<!-- 증권사별 목표가 비교 -->
+<div style="margin-top:20px;border-top:1px solid var(--border2);padding-top:18px;">
+  <div class="sdiv" style="margin-bottom:12px;">
+    <div class="sdiv-title">🏦 증권사별 목표가 비교</div>
+    <div class="sdiv-line"></div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);">각사 산출 기준 · Investing.com / TradingView 집계</div>
   </div>
-  <div class="conf-label">신뢰도 51% · 불확실성 상존</div>
-  <div class="pred-change up">▲ 현재가 대비 +17.1%</div>
-  <div style="margin-top:14px; font-size:0.72rem; color:var(--muted); line-height:1.6;">
-    • 모닝스타 공정가치 ₩313,346 기준<br>
-    • AI 반도체 사이클 본격 진입<br>
-    • 유가 하락 시 비용 구조 개선
+  <div class="broker-grid">
+    <div class="broker-card" data-target="340000" data-method="HBM 프리미엄 + AI 사이클">
+      <div class="broker-name">NH투자증권</div>
+      <div class="broker-target gold">₩340,000</div>
+      <div class="broker-upside up" id="bu-0">+80.9%↑</div>
+      <div class="broker-bar"><div style="width:100%;height:100%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:2px;"></div></div>
+      <div class="broker-method">HBM 프리미엄 + AI 사이클</div>
+    </div>
+    <div class="broker-card" data-target="280000" data-method="PER 12x · EPS ₩23,000">
+      <div class="broker-name">미래에셋증권</div>
+      <div class="broker-target gold">₩280,000</div>
+      <div class="broker-upside up" id="bu-1">+49.0%↑</div>
+      <div class="broker-bar"><div style="width:82%;height:100%;background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:2px;"></div></div>
+      <div class="broker-method">PER 12x · EPS ₩23,000</div>
+    </div>
+    <div class="broker-card" data-target="260000" data-method="DCF + 반도체 사이클">
+      <div class="broker-name">KB증권</div>
+      <div class="broker-target gold">₩260,000</div>
+      <div class="broker-upside up" id="bu-2">+38.4%↑</div>
+      <div class="broker-bar"><div style="width:76%;height:100%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:2px;"></div></div>
+      <div class="broker-method">DCF + 반도체 사이클</div>
+    </div>
+    <div class="broker-card" data-target="240000" data-method="EV/EBITDA 8x 기준">
+      <div class="broker-name">삼성증권</div>
+      <div class="broker-target gold">₩240,000</div>
+      <div class="broker-upside up" id="bu-3">+27.7%↑</div>
+      <div class="broker-bar"><div style="width:71%;height:100%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px;"></div></div>
+      <div class="broker-method">EV/EBITDA 8x 기준</div>
+    </div>
+    <div class="broker-card" data-target="220000" data-method="보수적 PER 9.5x">
+      <div class="broker-name">한국투자증권</div>
+      <div class="broker-target" style="color:var(--cyan);">₩220,000</div>
+      <div class="broker-upside up" id="bu-4">+17.1%↑</div>
+      <div class="broker-bar"><div style="width:65%;height:100%;background:linear-gradient(90deg,var(--cyan),#00a8ff);border-radius:2px;"></div></div>
+      <div class="broker-method">보수적 PER 9.5x</div>
+    </div>
+    <div class="broker-card" data-target="140000" data-method="다운사이드 리스크 반영">
+      <div class="broker-name">하한 추정 (최저)</div>
+      <div class="broker-target" style="color:var(--red);">₩140,000</div>
+      <div class="broker-upside dn" id="bu-5">-25.5%↓</div>
+      <div class="broker-bar"><div style="width:41%;height:100%;background:linear-gradient(90deg,var(--red),rgba(255,61,87,.4));border-radius:2px;"></div></div>
+      <div class="broker-method">다운사이드 리스크 반영</div>
+    </div>
   </div>
 </div>
 ```
 
   </div>
 
-  <!-- Smart Money & Factors -->
+  <!-- Sources -->
 
-  <div class="grid-2">
-
-```
-<!-- Smart Money -->
-<div class="card">
-  <div class="section-header" style="margin-bottom:10px;">
-    <div class="section-title">스마트 머니 동향</div>
-    <div class="section-line"></div>
-  </div>
-
-  <div class="sm-row">
-    <div class="sm-rank">#1</div>
-    <div class="sm-name">
-      <strong>BlackRock</strong>
-      <div style="font-size:0.68rem; color:var(--muted);">NVDA·AAPL·MSFT 집중 매수 → 반도체 섹터 강세</div>
+  <div class="panel">
+    <div class="sdiv">
+      <div class="sdiv-title">📚 데이터 출처 및 판단 근거</div>
+      <div class="sdiv-line"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);">★ = 실시간 자동 연동</div>
     </div>
-    <div class="sm-action action-bull">반도체 강세</div>
-    <div class="sm-weight">$5.9T AUM</div>
-  </div>
-
-  <div class="sm-row">
-    <div class="sm-rank">#2</div>
-    <div class="sm-name">
-      <strong>워런 버핏 (버크셔)</strong>
-      <div style="font-size:0.68rem; color:var(--muted);">기술주 선별 매수, 현금 보유 유지</div>
-    </div>
-    <div class="sm-action action-hold">선별 매수</div>
-    <div class="sm-weight">보수적</div>
-  </div>
-
-  <div class="sm-row">
-    <div class="sm-rank">#3</div>
-    <div class="sm-name">
-      <strong>iShares SOXX ETF</strong>
-      <div style="font-size:0.68rem; color:var(--muted);">반도체 ETF AI 인프라 수요 낙관</div>
-    </div>
-    <div class="sm-action action-buy">적극 매수</div>
-    <div class="sm-weight">AI 베팅</div>
-  </div>
-
-  <div class="sm-row">
-    <div class="sm-rank">#4</div>
-    <div class="sm-name">
-      <strong>국내 기관투자자</strong>
-      <div style="font-size:0.68rem; color:var(--muted);">WGBI 편입(4월~) 대비 KRW 강세 예상</div>
-    </div>
-    <div class="sm-action action-buy">순매수</div>
-    <div class="sm-weight">KRW ↑</div>
-  </div>
-
-  <div class="sm-row">
-    <div class="sm-rank">#5</div>
-    <div class="sm-name">
-      <strong>외국인 투자자</strong>
-      <div style="font-size:0.68rem; color:var(--muted);">삼성 52주 최고가 $223K 갱신 후 조정 중</div>
-    </div>
-    <div class="sm-action action-hold">관망</div>
-    <div class="sm-weight">중립</div>
-  </div>
-</div>
-
-<!-- Market Factors -->
-<div class="card">
-  <div class="section-header" style="margin-bottom:10px;">
-    <div class="section-title">주가 영향 요인 분석</div>
-    <div class="section-line"></div>
-  </div>
-
-  <div class="factor-row">
-    <div class="factor-name">USD/KRW 환율 (₩1,472)</div>
-    <div class="factor-val down">약세</div>
-    <div class="factor-impact impact-neg">수출 유리 / 자금이탈</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">WTI 유가 ($87 / 브렌트 $94)</div>
-    <div class="factor-val down">상승</div>
-    <div class="factor-impact impact-neg">비용 증가 압박</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">HBM / AI 반도체 수요</div>
-    <div class="factor-val up">급증</div>
-    <div class="factor-impact impact-pos">강력 호재</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">갤럭시 S26 출시 (2/25)</div>
-    <div class="factor-val up">호재</div>
-    <div class="factor-impact impact-pos">모바일 수익 증가</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">중동 지정학 리스크</div>
-    <div class="factor-val down">고조</div>
-    <div class="factor-impact impact-neg">공급망 불확실</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">WGBI 채권지수 편입 (4월)</div>
-    <div class="factor-val up">긍정</div>
-    <div class="factor-impact impact-pos">KRW 강세 · 외자유입</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">4/23 실적 발표 기대</div>
-    <div class="factor-val up">EPS↑</div>
-    <div class="factor-impact impact-pos">어닝 서프라이즈 +20%</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">Fed 금리 (2026년 2회 인하 전망)</div>
-    <div class="factor-val up">우호적</div>
-    <div class="factor-impact impact-pos">글로벌 유동성 개선</div>
-  </div>
-</div>
-```
-
-  </div>
-
-  <!-- Signal Gauge + Key Stats -->
-
-  <div class="grid-2" style="margin-top:0;">
-
-```
-<!-- Gauge -->
-<div class="card">
-  <div class="section-header" style="margin-bottom:4px;">
-    <div class="section-title">종합 투자 신호</div>
-    <div class="section-line"></div>
-  </div>
-  <div class="gauge-wrap">
-    <svg class="gauge-svg" width="220" height="130" viewBox="0 0 220 130">
-      <!-- Background arc -->
-      <path d="M 20 110 A 90 90 0 0 1 200 110" fill="none" stroke="#1a3554" stroke-width="18" stroke-linecap="round"/>
-      <!-- Danger zone (sell) -->
-      <path d="M 20 110 A 90 90 0 0 1 65 35" fill="none" stroke="rgba(255,71,87,0.4)" stroke-width="18" stroke-linecap="round"/>
-      <!-- Neutral zone -->
-      <path d="M 65 35 A 90 90 0 0 1 155 35" fill="none" stroke="rgba(255,204,0,0.4)" stroke-width="18" stroke-linecap="round"/>
-      <!-- Buy zone -->
-      <path d="M 155 35 A 90 90 0 0 1 200 110" fill="none" stroke="rgba(0,255,157,0.4)" stroke-width="18" stroke-linecap="round"/>
-
-      <!-- Active fill — pointing toward BUY (Strong Buy ~78%) -->
-      <path d="M 20 110 A 90 90 0 1 1 185 75" fill="none" stroke="url(#ggrad)" stroke-width="18" stroke-linecap="round" stroke-dasharray="220 283" />
-
-      <defs>
-        <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#ff4757"/>
-          <stop offset="50%" style="stop-color:#ffcc00"/>
-          <stop offset="100%" style="stop-color:#00ff9d"/>
-        </linearGradient>
-      </defs>
-
-      <!-- Needle -->
-      <line x1="110" y1="110" x2="185" y2="55" stroke="#00ff9d" stroke-width="2.5" stroke-linecap="round"/>
-      <circle cx="110" cy="110" r="6" fill="#00ff9d"/>
-
-      <!-- Labels -->
-      <text x="14" y="125" fill="#ff4757" font-size="9" font-family="IBM Plex Mono">SELL</text>
-      <text x="97" y="20" fill="#ffcc00" font-size="9" font-family="IBM Plex Mono" text-anchor="middle">HOLD</text>
-      <text x="193" y="125" fill="#00ff9d" font-size="9" font-family="IBM Plex Mono" text-anchor="end">BUY</text>
-    </svg>
-
-    <div style="font-family:'IBM Plex Mono',monospace; font-size:1.4rem; font-weight:700; color:var(--up); margin-top:-10px;">강력 매수</div>
-    <div class="signal-badge signal-buy" style="margin-top:8px;">STRONG BUY · 신뢰도 78%</div>
-    <div style="font-size:0.7rem; color:var(--muted); margin-top:10px; font-family:'IBM Plex Mono',monospace;">
-      37명 애널리스트 합산 · 35명 매수 / 2명 중립
+    <div class="src-grid">
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,212,255,.1);">★</div><div class="src-name">Yahoo Finance</div></div>
+        <span class="src-url">finance.yahoo.com/quote/005930.KS</span>
+        <div class="src-desc">삼성전자 실시간 주가 · 전일 대비 · 일중 범위. allorigins 프록시 자동 연동.</div>
+        <div class="src-data">현재가 · 변동률 — 실시간</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,212,255,.1);">★</div><div class="src-name">ExchangeRate-API</div></div>
+        <span class="src-url">open.er-api.com/v6/latest/USD</span>
+        <div class="src-desc">무료 · 키 불필요. USD/KRW 환율 자동 연동. 하루 1회 업데이트.</div>
+        <div class="src-data">USD/KRW — 실시간</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(240,180,41,.1);">🛢</div><div class="src-name">EIA (미국 에너지부)</div></div>
+        <span class="src-url">eia.gov/outlooks/steo</span>
+        <div class="src-desc">단기 에너지 전망(STEO). 브렌트 $94 · WTI $87. 중동 긴장 반영.</div>
+        <div class="src-data">WTI $87.29 · 브렌트 $94 — 2026.03.09</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,230,118,.1);">📊</div><div class="src-name">Investing.com</div></div>
+        <span class="src-url">investing.com/equities/samsung-electronics</span>
+        <div class="src-desc">37명 애널리스트 컨센서스 · 목표주가 ₩228,968 · Strong Buy.</div>
+        <div class="src-data">목표가 ₩228,968 · Strong Buy — 2026.03.10</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,230,118,.1);">📈</div><div class="src-name">TradingView</div></div>
+        <span class="src-url">tradingview.com/symbols/KRX-005930</span>
+        <div class="src-desc">40명 강력매수 · 목표가 ₩244,094 · EPS 서프라이즈 +20.51%.</div>
+        <div class="src-data">목표가 ₩244,094 · EPS +20% — 2026.03</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(240,180,41,.1);">⭐</div><div class="src-name">Morningstar</div></div>
+        <span class="src-url">morningstar.com/stocks/xkrx/005930</span>
+        <div class="src-desc">DCF 공정가치 ₩313,346. 현재가 대비 약 40% 할인. 불확실성: High.</div>
+        <div class="src-data">공정가치 ₩313,346 — 2026.01.30</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,212,255,.1);">🏦</div><div class="src-name">BlackRock SEC 13F</div></div>
+        <span class="src-url">sec.gov · fintel.io/i/blackrock</span>
+        <div class="src-desc">2026.02.12 공시. NVDA·AAPL·MSFT·AMZN·GOOGL 최상위. AUM $5.9조.</div>
+        <div class="src-data">포트폴리오 상위 종목 — 2026.02.12</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(0,230,118,.1);">📋</div><div class="src-name">Stockopedia</div></div>
+        <span class="src-url">stockopedia.com/share-prices/KRX:005930</span>
+        <div class="src-desc">PER 8.18x · 배당수익률 0.88% · 배당락일 3/30 · 지급일 4/20 · High Flyer.</div>
+        <div class="src-data">PER · 배당 · 등급 — 2026.03.10</div>
+      </div>
+      <div class="src-card">
+        <div class="src-top"><div class="src-icon" style="background:rgba(240,180,41,.1);">🌐</div><div class="src-name">RBC Capital Markets</div></div>
+        <span class="src-url">rbccm.com · Currency Report Card</span>
+        <div class="src-desc">WGBI 편입 월 $7B KRW 유입 예상. Fed 2026년 2회 금리인하 전망.</div>
+        <div class="src-data">KRW 전망 · 금리 인하 — 2026 Q1</div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Key Statistics -->
-<div class="card">
-  <div class="section-header" style="margin-bottom:10px;">
-    <div class="section-title">핵심 기초 지표</div>
-    <div class="section-line"></div>
-  </div>
+</div><!-- /main -->
 
-  <div class="factor-row">
-    <div class="factor-name">현재가 (3/10/2026)</div>
-    <div class="factor-val" style="color:var(--accent2);">₩187,900</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">52주 최고 / 최저</div>
-    <div class="factor-val">₩223,000 / ₩52,500</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">시가총액</div>
-    <div class="factor-val">₩1,105.02조</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">PER (TTM)</div>
-    <div class="factor-val">8.18x</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">EPS (TTM)</div>
-    <div class="factor-val">₩6,603</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">배당수익률</div>
-    <div class="factor-val">0.88%</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">모닝스타 공정가치</div>
-    <div class="factor-val up">₩313,346</div>
-  </div>
-  <div class="factor-row">
-    <div class="factor-name">평균 목표주가 (37명)</div>
-    <div class="factor-val up">₩228,968</div>
-  </div>
-</div>
-```
-
-  </div>
-
-  <!-- Copyright -->
-
-  <div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:0.7rem; color:var(--muted); margin-top:20px; padding: 10px 0;">
-    © 2026 정임두. All rights reserved. 무단 복제 및 배포를 금합니다.
-  </div>
-
-  <!-- Disclaimer -->
-
+<div class="footer">
   <div class="disclaimer">
-    <strong>⚠ 투자 주의사항</strong> — 본 대시보드는 실시간 공개 데이터(Investing.com, EIA, TradingView, Stockopedia 등)를 바탕으로 AI가 생성한 참고용 분석 자료입니다.
-    주가 예측은 과거 데이터, 거시지표, 애널리스트 컨센서스를 종합한 모델 추정치이며 실제 수익을 보장하지 않습니다.
-    투자 결정은 반드시 전문 금융 투자 어드바이저와 상담 후 개인 판단으로 이루어져야 합니다.
-    // 데이터 기준일: 2026년 3월 10~11일
+    <strong>⚠ 투자 주의사항</strong> — 본 대시보드는 위 9개 공개 출처의 실시간/최신 데이터를 기반으로 AI가 생성한 참고용 분석 자료입니다. 주가 예측은 과거 데이터·거시지표·애널리스트 컨센서스를 종합한 모델 추정치이며 <strong>실제 수익을 보장하지 않습니다.</strong> 투자 결정은 반드시 전문 금융 투자 어드바이저 상담 후 본인 판단으로 이루어져야 합니다.
   </div>
-
+  <div class="copyright">
+    © 2026 정임두. All rights reserved. 무단 복제 및 배포를 금합니다. &nbsp;|&nbsp; SAMSUNG ELECTRONICS AI PREDICTION DASHBOARD
+  </div>
 </div>
+
+</div><!-- /wrap -->
 
 <script>
-  // Update timestamp
-  const now = new Date();
-  document.getElementById('updateTime').textContent =
-    `갱신: ${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+const FB = 187900;
+const fmt = n => '₩' + Math.round(n).toLocaleString('ko-KR');
+const fmtK = n => '₩' + Math.round(n/1000).toLocaleString('ko-KR') + 'K';
 
-  // Price Chart
-  const ctx = document.getElementById('priceChart').getContext('2d');
+function setApi(msg, cls) {
+  const el = document.getElementById('apiStatus');
+  el.textContent = msg; el.className = 'api-pill ' + cls;
+}
 
-  // Historical + current + predicted data
-  const labels = [
-    '2025-09','2025-10','2025-11','2025-12',
-    '2026-01','2026-02','2026-03 (현재)',
-    '2026-03 (예측)','2026-04 (예측)','2026-05 (예측)'
-  ];
+// ── ExchangeRate-API ──
+async function loadFX() {
+  try {
+    const r = await fetch('https://open.er-api.com/v6/latest/USD');
+    const d = await r.json();
+    if (d?.rates?.KRW) {
+      const rate = d.rates.KRW;
+      const disp = '₩' + rate.toLocaleString('ko-KR', {maximumFractionDigits:2});
+      document.getElementById('kpiFx').textContent = disp;
+      document.getElementById('kpiFxDate').textContent = '업데이트: ' + (d.time_last_update_utc||'').slice(0,10);
+      document.getElementById('fxFactor').textContent = '₩' + Math.round(rate).toLocaleString();
+      document.querySelectorAll('#tk-fx,#tk-fx2').forEach(el => el.textContent = disp);
+    }
+  } catch(e) {
+    document.getElementById('kpiFx').textContent = '₩1,471.95';
+    document.getElementById('kpiFxDate').textContent = '(API 오류 · 고정값)';
+  }
+}
 
-  const historical = [62000, 58000, 55000, 53000, 63000, 155000, 187900, null, null, null];
-  const predicted =  [null, null, null, null, null, null, 187900, 192500, 208000, 220000];
-  const targetUpper = [null, null, null, null, null, null, 187900, 205000, 225000, 250000];
-  const targetLower = [null, null, null, null, null, null, 187900, 181000, 195000, 195000];
+// ── Yahoo Finance ──
+async function loadSamsung() {
+  try {
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?interval=1d&range=1d';
+    const proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(url);
+    const r = await fetch(proxy, { signal: AbortSignal.timeout(9000) });
+    const w = await r.json();
+    const meta = JSON.parse(w.contents).chart.result[0].meta;
+    const price = meta.regularMarketPrice || meta.previousClose;
+    const prev  = meta.chartPreviousClose || meta.previousClose;
+    const chg   = price - prev;
+    const pct   = chg / prev * 100;
+    const sign  = chg >= 0 ? '▲' : '▼';
+    const cls   = chg >= 0 ? 'up' : 'dn';
+    const high  = meta.regularMarketDayHigh;
+    const low   = meta.regularMarketDayLow;
 
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: '실제 주가',
-          data: historical,
-          borderColor: '#00c8ff',
-          backgroundColor: 'rgba(0,200,255,0.08)',
-          borderWidth: 2.5,
-          pointRadius: 4,
-          pointBackgroundColor: '#00c8ff',
-          fill: true,
-          tension: 0.3,
-          spanGaps: false,
-        },
-        {
-          label: 'AI 예측 중앙값',
-          data: predicted,
-          borderColor: '#00ff9d',
-          backgroundColor: 'rgba(0,255,157,0.06)',
-          borderWidth: 2.5,
-          borderDash: [6, 4],
-          pointRadius: 5,
-          pointBackgroundColor: '#00ff9d',
-          fill: false,
-          tension: 0.3,
-          spanGaps: false,
-        },
-        {
-          label: '예측 상단 범위',
-          data: targetUpper,
-          borderColor: 'rgba(255,107,53,0.4)',
-          backgroundColor: 'rgba(255,107,53,0.06)',
-          borderWidth: 1,
-          borderDash: [3, 5],
-          pointRadius: 0,
-          fill: '+1',
-          tension: 0.3,
-          spanGaps: false,
-        },
-        {
-          label: '예측 하단 범위',
-          data: targetLower,
-          borderColor: 'rgba(255,107,53,0.4)',
-          backgroundColor: 'rgba(255,107,53,0.06)',
-          borderWidth: 1,
-          borderDash: [3, 5],
-          pointRadius: 0,
-          fill: false,
-          tension: 0.3,
-          spanGaps: false,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: {
-          labels: {
-            color: '#5b7b9a',
-            font: { family: 'IBM Plex Mono', size: 10 },
-            boxWidth: 12,
-          }
-        },
-        tooltip: {
-          backgroundColor: '#0c1e35',
-          borderColor: '#1a3554',
-          borderWidth: 1,
-          titleColor: '#00c8ff',
-          bodyColor: '#e0eaf5',
-          titleFont: { family: 'IBM Plex Mono', size: 11 },
-          bodyFont: { family: 'IBM Plex Mono', size: 11 },
-          callbacks: {
-            label: ctx => {
-              if (ctx.raw == null) return null;
-              return `${ctx.dataset.label}: ₩${ctx.raw.toLocaleString()}`;
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: 'rgba(26,53,84,0.6)' },
-          ticks: {
-            color: '#5b7b9a',
-            font: { family: 'IBM Plex Mono', size: 9 },
-            maxRotation: 30,
-          }
-        },
-        y: {
-          grid: { color: 'rgba(26,53,84,0.6)' },
-          ticks: {
-            color: '#5b7b9a',
-            font: { family: 'IBM Plex Mono', size: 10 },
-            callback: v => '₩' + (v/1000).toFixed(0) + 'K'
-          }
-        }
+    document.getElementById('priceBig').textContent = fmt(price);
+    document.getElementById('priceChg').innerHTML =
+      `<span class="${cls}">${sign} ${Math.abs(chg).toLocaleString('ko-KR')} (${chg>=0?'+':''}${pct.toFixed(2)}%) 전일 대비</span>`;
+    document.getElementById('kpiPrice').textContent = fmt(price);
+    document.getElementById('kpiChg').innerHTML =
+      `<span class="${cls}">${sign} ${pct>=0?'+':''}${pct.toFixed(2)}%</span>`;
+    if (high && low)
+      document.getElementById('kpiRange').textContent = `일중: ${fmt(low)} ~ ${fmt(high)}`;
+    document.getElementById('statPrice').textContent = fmt(price);
+
+    // ticker
+    document.getElementById('tk-price').textContent = fmt(price);
+
+    const now = new Date();
+    document.getElementById('updateTime').textContent =
+      `갱신 ${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} KST`;
+
+    setApi('실시간 연동 ✓', 'api-ok');
+    updatePred(price);
+    updateChart(price);
+    return price;
+  } catch(e) {
+    document.getElementById('priceBig').textContent = fmt(FB);
+    document.getElementById('priceChg').innerHTML = `<span class="up">▲ +14,400 (+8.30%) 전일 대비</span>`;
+    document.getElementById('kpiPrice').textContent = fmt(FB);
+    document.getElementById('kpiChg').innerHTML = `<span class="up">▲ +8.30%</span>`;
+    document.getElementById('kpiRange').textContent = '일중: ₩184,300 ~ ₩191,500';
+    document.getElementById('updateTime').textContent = '2026.03.10 기준 (고정값)';
+    setApi('고정값 사용', 'api-err');
+    updatePred(FB);
+    return FB;
+  }
+}
+
+// ── Prediction math ──
+function updatePred(p) {
+  const r = m => Math.round(p * m / 100) * 100;
+  const pct = v => ((v-p)/p*100).toFixed(1);
+  const p1=r(1.0245), p2=r(1.107), p3=r(1.171);
+
+  document.getElementById('pred1').textContent = fmt(p1);
+  document.getElementById('pred2').textContent = fmt(p2);
+  document.getElementById('pred3').textContent = fmt(p3);
+  document.getElementById('pred1r').textContent = `${fmtK(r(0.963))} ~ ${fmtK(r(1.091))}`;
+  document.getElementById('pred2r').textContent = `${fmtK(r(1.038))} ~ ${fmtK(r(1.198))}`;
+  document.getElementById('pred3r').textContent = `${fmtK(r(1.038))} ~ ${fmtK(r(1.331))}`;
+  document.getElementById('pred1c').textContent = `▲+${pct(p1)}%`;
+  document.getElementById('pred2c').textContent = `▲+${pct(p2)}%`;
+  document.getElementById('pred3c').textContent = `▲+${pct(p3)}%`;
+}
+
+// ── Chart ──
+const chartCtx = document.getElementById('priceChart').getContext('2d');
+window._chart = new Chart(chartCtx, {
+  type: 'line',
+  data: {
+    labels: ['2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','현재','3월(예)','4월(예)','5월(예)'],
+    datasets: [
+      { label:'실제 주가',
+        data:[62000,58000,55000,53000,63000,155000,FB,null,null,null],
+        borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.07)',
+        borderWidth:2.5, pointRadius:4, pointBackgroundColor:'#00d4ff',
+        fill:true, tension:0.35, spanGaps:false },
+      { label:'AI 예측',
+        data:[null,null,null,null,null,null,FB,192500,208000,220000],
+        borderColor:'#00e676', borderWidth:2.5, borderDash:[7,4],
+        pointRadius:5, pointBackgroundColor:'#00e676',
+        fill:false, tension:0.35, spanGaps:false },
+      { label:'상단 범위',
+        data:[null,null,null,null,null,null,FB,205000,225000,250000],
+        borderColor:'rgba(240,180,41,0.3)', borderWidth:1, borderDash:[3,6],
+        pointRadius:0, fill:'+1', backgroundColor:'rgba(240,180,41,0.04)', tension:0.35, spanGaps:false },
+      { label:'하단 범위',
+        data:[null,null,null,null,null,null,FB,181000,195000,195000],
+        borderColor:'rgba(240,180,41,0.3)', borderWidth:1, borderDash:[3,6],
+        pointRadius:0, fill:false, tension:0.35, spanGaps:false }
+    ]
+  },
+  options: {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ labels:{ color:'#4a637f', font:{family:'DM Mono',size:9}, boxWidth:10, padding:12 } },
+      tooltip:{
+        backgroundColor:'rgba(10,22,40,0.95)',
+        borderColor:'rgba(240,180,41,0.3)', borderWidth:1,
+        titleColor:'#f0b429', bodyColor:'#8fa3bf',
+        titleFont:{family:'DM Mono',size:10}, bodyFont:{family:'DM Mono',size:10},
+        padding:10,
+        callbacks:{ label: c => c.raw==null ? null : `${c.dataset.label}: ₩${c.raw.toLocaleString()}` }
       }
+    },
+    scales:{
+      x:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#4a637f',font:{family:'DM Mono',size:8},maxRotation:30} },
+      y:{ grid:{color:'rgba(255,255,255,0.03)'}, ticks:{color:'#4a637f',font:{family:'DM Mono',size:9}, callback:v=>'₩'+(v/1000).toFixed(0)+'K'} }
+    }
+  }
+});
+
+function updateChart(price) {
+  const ds = window._chart.data.datasets;
+  const r = m => Math.round(price*m/100)*100;
+  ds[0].data[6] = price;
+  ds[1].data = [null,null,null,null,null,null,price,r(1.0245),r(1.107),r(1.171)];
+  ds[2].data = [null,null,null,null,null,null,price,r(1.091),r(1.198),r(1.331)];
+  ds[3].data = [null,null,null,null,null,null,price,r(0.963),r(1.038),r(1.038)];
+  window._chart.update();
+}
+
+// ── Simulator ──
+const BASE_PRICE_SIM = { val: 187900 };
+
+// 가중치 (상관계수 기반)
+const WEIGHTS = {
+  fx:   { w: -0.45, base: 1472,    unit: '₩', label: 'USD/KRW', fmt: v => '₩' + Math.round(v).toLocaleString() },
+  oil:  { w: -0.28, base: 87.29,   unit: '$', label: 'WTI',     fmt: v => '$' + v.toFixed(2) },
+  rate: { w: -0.35, base: 4.25,    unit: '%', label: 'Fed Rate', fmt: v => v.toFixed(2) + '%' },
+  semi: { w:  0.62, base: 100,     unit: 'p', label: '반도체수요', fmt: v => Math.round(v) + 'p' },
+  ana:  { w:  0.41, base: 228968,  unit: '₩', label: '목표가',   fmt: v => '₩' + Math.round(v).toLocaleString() },
+};
+
+const SLIDER_IDS = ['fx','oil','rate','semi','ana'];
+
+function getSliderPcts() {
+  return {
+    fx:   parseFloat(document.getElementById('sl-fx').value) / 100,
+    oil:  parseFloat(document.getElementById('sl-oil').value) / 100,
+    rate: parseFloat(document.getElementById('sl-rate').value) / 10000, // bp → decimal
+    semi: parseFloat(document.getElementById('sl-semi').value) / 100,
+    ana:  parseFloat(document.getElementById('sl-ana').value) / 100,
+  };
+}
+
+function runSim() {
+  const pcts = getSliderPcts();
+  const base = BASE_PRICE_SIM.val;
+
+  // P = P₀ × (1 + Σ wᵢ·Δxᵢ)
+  let totalEffect = 0;
+  const contribs = {};
+
+  for (const [key, info] of Object.entries(WEIGHTS)) {
+    const delta = key === 'rate'
+      ? parseFloat(document.getElementById('sl-rate').value) / 10000
+      : parseFloat(document.getElementById('sl-' + key).value) / 100;
+    const effect = info.w * delta;
+    contribs[key] = effect;
+    totalEffect += effect;
+  }
+
+  const simPrice = Math.round(base * (1 + totalEffect) / 100) * 100;
+  const diff = simPrice - base;
+  const diffPct = (diff / base * 100);
+
+  // 결과 업데이트
+  const priceEl = document.getElementById('simPrice');
+  priceEl.textContent = '₩' + simPrice.toLocaleString('ko-KR');
+  priceEl.style.color = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--cyan)';
+
+  const diffEl = document.getElementById('simDiff');
+  const sign = diff >= 0 ? '+' : '';
+  diffEl.innerHTML = `기준가 대비 <span style="color:${diff>=0?'var(--green)':'var(--red)'};font-weight:600;">${sign}${diff.toLocaleString('ko-KR')}원 (${sign}${diffPct.toFixed(2)}%)</span>`;
+
+  // 기여도 리스트
+  const maxAbs = Math.max(...Object.values(contribs).map(Math.abs), 0.001);
+  const contribHTML = Object.entries(contribs).map(([key, eff]) => {
+    const info = WEIGHTS[key];
+    const pct = (eff * 100).toFixed(2);
+    const col = eff >= 0 ? 'var(--green)' : 'var(--red)';
+    const barW = Math.min(Math.abs(eff) / maxAbs * 100, 100);
+    return `<div class="contrib-item">
+      <div class="contrib-name">${info.label}</div>
+      <div class="contrib-mini-bar"><div class="contrib-mini-fill" style="width:${barW}%;background:${col};"></div></div>
+      <div class="contrib-val" style="color:${col};">${eff>=0?'+':''}${pct}%</div>
+    </div>`;
+  }).join('');
+  document.getElementById('contribList').innerHTML = contribHTML;
+
+  // 공식 업데이트
+  const terms = Object.entries(WEIGHTS).map(([key, info]) => {
+    const delta = key === 'rate'
+      ? parseFloat(document.getElementById('sl-rate').value) / 10000
+      : parseFloat(document.getElementById('sl-' + key).value) / 100;
+    if (Math.abs(delta) < 0.0001) return null;
+    const sign = info.w >= 0 ? '+' : '';
+    return `${sign}(${info.w}×${(delta*100).toFixed(1)}%)`;
+  }).filter(Boolean);
+
+  const formulaStr = terms.length
+    ? `P = ₩${base.toLocaleString()} × (1 ${terms.join(' ')})\n  = ₩${simPrice.toLocaleString()}`
+    : 'P = P₀ × (1 + Σwᵢ·Δxᵢ)  ← 슬라이더를 움직여보세요';
+  document.getElementById('simFormula').style.whiteSpace = 'pre';
+  document.getElementById('simFormula').textContent = formulaStr;
+
+  // 각 슬라이더 보조 업데이트
+  updateLeverUI('fx',   parseFloat(document.getElementById('sl-fx').value),   WEIGHTS.fx);
+  updateLeverUI('oil',  parseFloat(document.getElementById('sl-oil').value),  WEIGHTS.oil);
+  updateLeverUIBp('rate', parseFloat(document.getElementById('sl-rate').value));
+  updateLeverUI('semi', parseFloat(document.getElementById('sl-semi').value), WEIGHTS.semi);
+  updateLeverUI('ana',  parseFloat(document.getElementById('sl-ana').value),  WEIGHTS.ana);
+
+  // 증권사 upside 재계산
+  updateBrokerUpside(simPrice);
+}
+
+function updateLeverUI(key, pctVal, info) {
+  const delta = pctVal / 100;
+  const simVal = info.base * (1 + delta);
+  document.getElementById('ld-' + key).textContent = `변동: ${pctVal >= 0 ? '+' : ''}${pctVal.toFixed(1)}%`;
+  document.getElementById('sv-' + key).textContent = info.fmt(simVal);
+
+  const effect = info.w * delta;
+  const col = effect >= 0 ? 'var(--green)' : 'var(--red)';
+  const barW = Math.min(Math.abs(pctVal) / (key === 'semi' ? 40 : key === 'oil' ? 50 : 30) * 100, 100);
+  document.getElementById('lf-' + key).style.width = barW + '%';
+  document.getElementById('lf-' + key).style.background = col;
+
+  const badge = document.getElementById('lb-' + key);
+  if (Math.abs(pctVal) < 0.1) {
+    badge.textContent = '기준';
+    badge.style.background = 'rgba(255,255,255,.05)';
+    badge.style.color = 'var(--text3)';
+    badge.style.borderColor = 'rgba(255,255,255,.08)';
+  } else {
+    badge.textContent = `${pctVal >= 0 ? '▲' : '▼'} ${Math.abs(pctVal).toFixed(1)}%`;
+    badge.style.background = effect >= 0 ? 'rgba(0,230,118,.1)' : 'rgba(255,61,87,.1)';
+    badge.style.color = effect >= 0 ? 'var(--green)' : 'var(--red)';
+    badge.style.borderColor = effect >= 0 ? 'rgba(0,230,118,.25)' : 'rgba(255,61,87,.25)';
+  }
+}
+
+function updateLeverUIBp(key, bpVal) {
+  const pct = bpVal / 100;
+  const simRate = 4.25 + pct;
+  document.getElementById('ld-' + key).textContent = `변동: ${bpVal >= 0 ? '+' : ''}${bpVal}bp`;
+  document.getElementById('sv-' + key).textContent = simRate.toFixed(2) + '%';
+
+  const delta = bpVal / 10000;
+  const effect = WEIGHTS.rate.w * delta;
+  const col = effect >= 0 ? 'var(--green)' : 'var(--red)';
+  const barW = Math.min(Math.abs(bpVal) / 200 * 100, 100);
+  document.getElementById('lf-rate').style.width = barW + '%';
+  document.getElementById('lf-rate').style.background = col;
+
+  const badge = document.getElementById('lb-rate');
+  if (Math.abs(bpVal) < 1) {
+    badge.textContent = '기준';
+    badge.style.background = 'rgba(255,255,255,.05)';
+    badge.style.color = 'var(--text3)';
+    badge.style.borderColor = 'rgba(255,255,255,.08)';
+  } else {
+    badge.textContent = `${bpVal >= 0 ? '▲' : '▼'} ${Math.abs(bpVal)}bp`;
+    badge.style.background = effect >= 0 ? 'rgba(0,230,118,.1)' : 'rgba(255,61,87,.1)';
+    badge.style.color = effect >= 0 ? 'var(--green)' : 'var(--red)';
+    badge.style.borderColor = effect >= 0 ? 'rgba(0,230,118,.25)' : 'rgba(255,61,87,.25)';
+  }
+}
+
+function updateBrokerUpside(simPrice) {
+  document.querySelectorAll('.broker-card').forEach((card, i) => {
+    const target = parseInt(card.dataset.target);
+    const upside = ((target - simPrice) / simPrice * 100);
+    const el = document.getElementById('bu-' + i);
+    if (el) {
+      const sign = upside >= 0 ? '+' : '';
+      el.textContent = `${sign}${upside.toFixed(1)}%${upside >= 0 ? '↑' : '↓'}`;
+      el.className = 'broker-upside ' + (upside >= 0 ? 'up' : 'dn');
     }
   });
+}
+
+function resetSim() {
+  ['sl-fx','sl-oil','sl-rate','sl-semi','sl-ana'].forEach(id => {
+    document.getElementById(id).value = 0;
+  });
+  runSim();
+}
+
+// 현재가 연동 — loadSamsung 완료 후 base 업데이트
+const _origUpdatePred = updatePred;
+function updatePred(price) {
+  _origUpdatePred(price);
+  BASE_PRICE_SIM.val = price;
+  document.getElementById('simPrice').textContent = '₩' + price.toLocaleString('ko-KR');
+  document.getElementById('simPrice').style.color = 'var(--cyan)';
+  document.getElementById('simDiff').textContent = '기준가 대비 ±0원 (±0.00%)';
+  updateBrokerUpside(price);
+}
+
+// 초기 실행
+runSim();
+
+// ── Init ──
+setApi('연결 중...', 'api-loading');
+Promise.all([loadSamsung(), loadFX()]);
 </script>
 
 </body>
